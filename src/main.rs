@@ -17,8 +17,7 @@ fn main() {
     let mut options = eframe::NativeOptions::default();
     options.hardware_acceleration = HardwareAcceleration::Required;
     options.initial_window_size = Some(Vec2::new(1600.0, 1200.0));
-    options.vsync = false;
-
+    options.vsync = true;
 
     eframe::run_native(
         "Ray tracer in one weekend",

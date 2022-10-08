@@ -16,7 +16,7 @@ impl Ray {
     }
 
     #[allow(dead_code)]
-    fn at(&self, t: f64) -> Point3 {
+    pub(crate) fn at(&self, t: f64) -> Point3 {
         self.origin + (self.direction * t)
     }
 
