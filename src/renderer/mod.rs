@@ -1,7 +1,13 @@
+use std::f64::INFINITY;
 use egui::{ColorImage};
-use egui::color::gamma_u8_from_linear_f32;
 use crate::{Color3, Ray, Vec3};
 use crate::math::Point3;
+use crate::renderer::hittable::Hittable;
+use crate::renderer::scene::Scene;
+
+pub mod hittable;
+pub mod scene;
+
 
 pub struct RenderParams {
     pub(crate) focal_length: f64,
@@ -12,47 +18,28 @@ impl Default for RenderParams {
     fn default() -> Self {
         Self {
             focal_length: 1.0,
-            radius: 0.5
+            radius: 0.5,
         }
     }
 }
+
 pub struct Renderer {}
 
 impl Renderer {
-    fn ray_color(ray: &Ray, params: &RenderParams) -> Vec3 {
-        let center = Point3::new(0.0, 0.0, -1.0);
-        let radius = params.radius;
-        let hit_distance = Self::hit_sphere(&center, radius, ray);
-        if hit_distance > 0.0 {
-            let n = (ray.at(hit_distance) - Vec3::new(0.0, 0.0, -1.0)).normalized();
-            return Color3::new(n.x() + 1.0, n.y() + 1.0, n.z() + 1.0) * 0.5;
+    fn ray_color(ray: &Ray, scene: &Scene) -> Vec3 {
+        let hit = scene.hit(ray, 0.0, f64::INFINITY);
+
+        // let hit_distance = Self::hit_sphere(&center, radius, ray);
+        if let Some(the_hit) = hit {
+            return (the_hit.normal + Color3::splat(1.0)) * 0.5;
         }
 
         let unit_direction = ray.direction() / ray.direction().length();
-
         let t = 0.5 * (unit_direction.y() + 1.0);
-
         return Color3::splat(1.0).lerp(1.0 - t, &BG_COLOR);
-        // return (Color3::splat(1.0 - t)) + (BG_COLOR * t);
     }
 
-    fn hit_sphere(center: &Vec3, radius: f64, r: &Ray) -> f64 {
-        let oc = r.origin() - center;
-        let a = Vec3::dot(r.direction(), r.direction());
-        let b = 2.0 * Vec3::dot(&oc, r.direction());
-        let c = Vec3::dot(&oc, &oc) - radius * radius;
-
-
-        let discriminant = (b * b) - (4.0 * a * c);
-        return if discriminant < 0.0 {
-            -1.0
-        } else {
-            (-b - discriminant.sqrt()) / (2.0 * a)
-        };
-    }
-
-
-    pub fn render(&mut self, image: &mut ColorImage, params: &RenderParams) {
+    pub fn render(&mut self, image: &mut ColorImage, params: &RenderParams, scene: &Scene) {
         let image_width = image.size[0] as f64;
         let image_height = image.size[1] as f64;
         let aspect_ratio = image_width / image_height;
@@ -78,14 +65,15 @@ impl Renderer {
                     lower_left_corner + Vec3::new(u, v, 0.0) - origin,
                 );
 
-                Self::set_pixel(image, x, y, Self::ray_color(&ray, params));
+                Self::set_pixel(image, x, y, Self::ray_color(&ray, scene));
             }
         }
     }
 
     fn set_pixel(render_image: &mut ColorImage, x: usize, y: usize, color: Color3) {
         let size = render_image.size;
-        let dest = &mut render_image.pixels[y * size[0] + x];
+        let dest = &mut render_image.pixels[(size[1] - y - 1) * size[0] + x];
+
         dest[0] = fast_round(color.x() * ALMOST_256);
         dest[1] = fast_round(color.y() * ALMOST_256);
         dest[2] = fast_round(color.z() * ALMOST_256);
