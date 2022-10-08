@@ -1,7 +1,6 @@
 use crate::math::Point3;
 use crate::math::{Vec3};
 
-
 pub struct Ray
 {
     origin: Point3,
@@ -16,6 +15,7 @@ impl Ray {
         }
     }
 
+    #[allow(dead_code)]
     fn at(&self, t: f64) -> Point3 {
         self.origin + (self.direction * t)
     }
