@@ -16,6 +16,7 @@ pub mod scene;
 pub struct RenderParams {
     pub(crate) focal_length: f64,
     pub(crate) samples: i16,
+    pub min_ray_distance: f64
 }
 
 impl Default for RenderParams {
@@ -23,13 +24,14 @@ impl Default for RenderParams {
         Self {
             focal_length: 1.0,
             samples: 10,
+            min_ray_distance: 0.001
         }
     }
 }
 
 
 pub struct Renderer {
-    random: ThreadRng
+    random: ThreadRng,
 }
 
 impl Renderer {
@@ -54,7 +56,7 @@ impl Renderer {
 
 
                     let ray = camera.cast_ray(u, v);
-                    let color = self.ray_color(&ray, scene, 0);
+                    let color = self.ray_color(&ray, scene, params, 0);
                     cumulated_color = cumulated_color + color;
                 }
 
@@ -63,18 +65,18 @@ impl Renderer {
         }
     }
 
-    fn ray_color(&mut self, ray: &Ray, scene: &Scene, depth: i16) -> Color3 {
+    fn ray_color(&mut self, ray: &Ray, scene: &Scene, params: &RenderParams, depth: i32) -> Color3 {
         if depth > 50 {
             return Color3::splat(0.0);
         }
-        let hit = scene.hit(ray, 0.0, f64::INFINITY);
+        let hit = scene.hit(ray, 0.001, f64::INFINITY);
 
         // let hit_distance = Self::hit_sphere(&center, radius, ray);
         if let Some(the_hit) = hit {
             let random_bounce = the_hit.point + the_hit.normal + self.random_in_unit_sphere();
             // return (the_hit.normal + Color3::splat(1.0)) * 0.5;
             let new_ray = Ray::new(the_hit.point, random_bounce);
-            return self.ray_color(&new_ray, &scene, depth + 1) * 0.5;
+            return self.ray_color(&new_ray, &scene, params, depth + 1) * 0.5;
         }
 
 
@@ -103,7 +105,7 @@ impl Renderer {
         Vec3::new(
             self.random.gen::<f64>(),
             self.random.gen::<f64>(),
-            self.random.gen::<f64>()
+            self.random.gen::<f64>(),
         )
     }
 }

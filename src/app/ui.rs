@@ -54,6 +54,16 @@ impl eframe::App for MyApp {
                 egui::Slider::new(&mut self.params.focal_length, 0.0..=1.0)
                     .text("Focal length")
             );
+            ui.add(
+                egui::Slider::new(&mut self.params.samples, 0..=100)
+                    .text("Number of samples")
+            );
+
+            ui.add(
+                egui::Slider::new(&mut self.params.min_ray_distance, 0.0001..=0.1)
+                    .text("Min ray distance")
+            );
+
             ui.heading("Scene contents ");
             let mut id = 1;
             for object in &mut self.render_box.scene.contents {
