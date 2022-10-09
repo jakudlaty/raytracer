@@ -1,6 +1,6 @@
+use eframe::epaint::Color32;
 use std::fmt::{format, Display, Formatter};
 use std::ops::{Add, Div, Mul, Neg, Sub};
-use eframe::epaint::Color32;
 
 #[derive(Default, Copy, Clone, Debug)]
 pub struct Vec3 {
@@ -215,16 +215,12 @@ impl Display for Vec3 {
 
 impl From<Vec3> for [f32; 3] {
     fn from(x: Vec3) -> Self {
-        x.data.map(|a| { a as f32 })
+        x.data.map(|a| a as f32)
     }
 }
 
 impl From<[f32; 3]> for Vec3 {
     fn from(x: [f32; 3]) -> Self {
-        Vec3::new(
-            x[0] as f64,
-            x[1] as f64,
-            x[2] as f64,
-        )
+        Vec3::new(x[0] as f64, x[1] as f64, x[2] as f64)
     }
 }

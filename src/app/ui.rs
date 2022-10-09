@@ -1,7 +1,6 @@
-use std::fmt::format;
 use crate::renderer::hittable::Hittable;
 use crate::renderer::scene::{Scene, SceneObject};
-use crate::renderer::{RenderParams, Renderer, Resolution};
+use crate::renderer::{RenderParams, Renderer};
 use crate::{MyApp, Vec3};
 use egui::{Color32, ColorImage, ProgressBar, Response, TextureFilter, TextureHandle, Ui, Widget};
 
@@ -27,7 +26,7 @@ impl RenderBox {
         let texture: &mut TextureHandle = self.tex_handle.get_or_insert_with(|| {
             // Load the texture only once.
             ui.ctx()
-              .load_texture("my-image", self.render_image.clone(), TextureFilter::Linear)
+                .load_texture("my-image", self.render_image.clone(), TextureFilter::Linear)
         });
 
         self.renderer
@@ -54,13 +53,20 @@ impl eframe::App for MyApp {
                     .selected_text(format!("{}", self.params.resolution))
                     .show_ui(ui, |ui| {
                         for res in &self.params.available_resolutions {
-                            ui.selectable_value(&mut self.params.resolution, *res, format!("{}", res));
+                            ui.selectable_value(
+                                &mut self.params.resolution,
+                                *res,
+                                format!("{}", res),
+                            );
                         }
                     });
                 ui.add(
-                    egui::Slider::new(&mut self.params.focal_length, 0.0..=1.0).text("Focal length"),
+                    egui::Slider::new(&mut self.params.focal_length, 0.0..=1.0)
+                        .text("Focal length"),
                 );
-                ui.add(egui::Slider::new(&mut self.params.samples, 0..=1000).text("Number of samples"));
+                ui.add(
+                    egui::Slider::new(&mut self.params.samples, 0..=1000).text("Number of samples"),
+                );
 
                 ui.add(
                     egui::Slider::new(&mut self.params.min_ray_distance, 0.0001..=0.1)
