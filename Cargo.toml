@@ -1,6 +1,6 @@
 [package]
 name = "raytracer-rs"
-version = "0.1.2"
+version = "0.1.3"
 edition = "2021"
 authors = ["Maciej Stępyra <jakudlaty@gmail.com>"]
 description = "This is Rust implementation of raytracer described in \"Ray Tracing in One Weekend\""
