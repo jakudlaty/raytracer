@@ -2,17 +2,25 @@ use crate::math::Point3;
 use crate::renderer::hittable::{Hit, Hittable};
 use crate::renderer::scene::sphere::Sphere;
 use crate::Ray;
-use type_uuid::TypeUuid;
-use uuid::Uuid;
 
 pub(crate) mod sphere;
 
-#[derive(TypeUuid)]
-#[uuid = "d4adfc76-f5f4-40b0-8e28-8a51a12f5e46"]
-pub struct Scene {
-    pub(crate) contents: Vec<Box<dyn Hittable>>,
+#[derive(Clone)]
+pub enum SceneObject {
+    Sphere(Sphere),
 }
 
+pub struct Scene {
+    pub(crate) contents: Vec<SceneObject>,
+}
+
+impl Clone for Scene {
+    fn clone(&self) -> Self {
+        Self {
+            contents: self.contents.iter().cloned().collect(),
+        }
+    }
+}
 
 impl Hittable for Scene {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<Hit> {
@@ -20,42 +28,29 @@ impl Hittable for Scene {
         let mut closest_hit: Option<Hit> = None;
 
         for object in &self.contents {
-            if let Some(hit) = object.hit(ray, t_min, closest_so_far) {
-                closest_so_far = hit.t;
-                closest_hit = Some(hit)
+            match object {
+                SceneObject::Sphere(sphere) => {
+                    if let Some(hit) = sphere.hit(ray, t_min, closest_so_far) {
+                        closest_so_far = hit.t;
+                        closest_hit = Some(hit)
+                    }
+                }
             }
         }
         return closest_hit;
     }
 
-    fn uid(&self) -> Uuid {
-        return Uuid::from_bytes(Scene::UUID);
-    }
-
     fn name(&self) -> String {
         "scene".to_string()
     }
-
-    fn clone_box(&self) -> Box<dyn Hittable> {
-        let members: Vec<Box<dyn Hittable>> = self.contents.iter().map(|a| {
-            a.clone_box()
-        }).collect();
-
-        return Box::new(
-            Self {
-                contents: members
-            }
-        )
-    }
 }
-
 
 impl Default for Scene {
     fn default() -> Self {
         Self {
             contents: vec![
-                Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)),
-                Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)),
+                SceneObject::Sphere(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)),
+                SceneObject::Sphere(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)),
             ],
         }
     }
