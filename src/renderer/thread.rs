@@ -37,8 +37,8 @@ impl RenderThread {
                 RenderThreadCommand::UpdateRenderParams(params) => self.params = params,
                 RenderThreadCommand::RequestFrame => {
                     if let Some(scene) = &self.scene {
-                        let mut image = ColorImage::new([800, 600], Color32::BLACK);
                         let render_params = &self.params;
+                        let mut image = ColorImage::new(render_params.resolution.into(), Color32::BLACK);
                         self.render(&mut image, render_params, scene);
                         self.sender
                             .send(RenderThreadResponse::FrameRendered(image))
@@ -89,7 +89,7 @@ impl RenderThread {
             let random_bounce = the_hit.point + the_hit.normal + Self::random_in_unit_sphere();
             // return (the_hit.normal + Color3::splat(1.0)) * 0.5;
             let new_ray = Ray::new(the_hit.point, random_bounce);
-            return Self::ray_color(&new_ray, scene, params, depth + 1) * 0.5;
+            return Self::ray_color(&new_ray, scene, params, depth + 1) * 0.5 * the_hit.surface;
         }
 
         let unit_direction = ray.direction() / ray.direction().length();
