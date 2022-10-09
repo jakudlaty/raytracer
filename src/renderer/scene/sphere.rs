@@ -1,12 +1,13 @@
 use crate::math::Point3;
 use crate::renderer::hittable::{Hit, Hittable};
-use crate::{Ray, Vec3};
+use crate::{Color3, Ray, Vec3};
 
 #[derive(Clone)]
 pub struct Sphere {
     pub(crate) center: Point3,
     pub(crate) radius: f64,
     pub max_radius: f64,
+    pub color: Color3,
 }
 
 impl Sphere {
@@ -15,6 +16,7 @@ impl Sphere {
             center,
             radius,
             max_radius: 2.0 * radius,
+            color: Color3::splat(1.0),
         }
     }
 }
@@ -55,6 +57,7 @@ impl Hittable for Sphere {
                 normal,
                 front_face,
                 t: root,
+                surface: self.color,
             };
             return Some(hit_record);
         };

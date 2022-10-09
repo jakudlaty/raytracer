@@ -1,3 +1,4 @@
+use eframe::epaint::Color32;
 use std::fmt::{format, Display, Formatter};
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
@@ -209,5 +210,17 @@ impl Color3 {
 impl Display for Vec3 {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(f, "({},{},{})", self.x(), self.y(), self.z())
+    }
+}
+
+impl From<Vec3> for [f32; 3] {
+    fn from(x: Vec3) -> Self {
+        x.data.map(|a| a as f32)
+    }
+}
+
+impl From<[f32; 3]> for Vec3 {
+    fn from(x: [f32; 3]) -> Self {
+        Vec3::new(x[0] as f64, x[1] as f64, x[2] as f64)
     }
 }

@@ -1,8 +1,11 @@
 use crate::{Color3, Ray, Vec3};
 use egui::{Color32, ColorImage};
+use std::fmt::{Display, Formatter};
+use std::ops::Mul;
 
 use rand::Rng;
 
+use crate::renderer::resolution::Resolution;
 use std::sync::mpsc::{channel, Receiver, RecvError, Sender};
 
 use crate::renderer::scene::Scene;
@@ -10,22 +13,28 @@ use crate::renderer::thread::{RenderThread, RenderThreadCommand, RenderThreadRes
 
 pub mod camera;
 pub mod hittable;
+mod resolution;
 pub mod scene;
 mod thread;
 
-#[derive(Copy, Clone)]
+#[derive(Clone)]
 pub struct RenderParams {
     pub(crate) focal_length: f64,
     pub(crate) samples: i16,
     pub min_ray_distance: f64,
+    pub resolution: Resolution,
+    pub available_resolutions: Vec<Resolution>,
 }
 
 impl Default for RenderParams {
     fn default() -> Self {
+        let resolutions = Resolution::available();
         Self {
             focal_length: 1.0,
-            samples: 200,
+            samples: 100,
             min_ray_distance: 0.001,
+            resolution: resolutions[0],
+            available_resolutions: resolutions,
         }
     }
 }
@@ -79,10 +88,8 @@ impl Renderer {
                     RenderThreadResponse::FrameRendered(im) => {
                         *image = im;
                         self.waiting_for_next_frame = false
-                    },
-                    RenderThreadResponse::ProgressUpdate(fraction) => {
-                        self.progress = fraction
                     }
+                    RenderThreadResponse::ProgressUpdate(fraction) => self.progress = fraction,
                 }
             }
         }
