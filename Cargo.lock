@@ -1452,6 +1452,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "raytracer-rs"
+version = "0.1.0"
+dependencies = [
+ "eframe",
+ "egui",
+ "rand",
+ "type-uuid",
+ "uuid 1.2.0",
+]
+
+[[package]]
 name = "redox_syscall"
 version = "0.2.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2028,17 +2039,6 @@ dependencies = [
  "web-sys",
  "widestring",
  "winapi",
-]
-
-[[package]]
-name = "weekend_raytracer"
-version = "0.1.0"
-dependencies = [
- "eframe",
- "egui",
- "rand",
- "type-uuid",
- "uuid 1.2.0",
 ]
 
 [[package]]

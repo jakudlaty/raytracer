@@ -1,6 +1,6 @@
-use std::time::Instant;
-use crate::app::ui::{RenderBox};
+use crate::app::ui::RenderBox;
 use crate::renderer::RenderParams;
+use std::time::Instant;
 
 mod ui;
 
@@ -15,7 +15,7 @@ impl Default for MyApp {
         Self {
             render_box: RenderBox::new(),
             last_frame_time: Instant::now(),
-            params: RenderParams::default()
+            params: RenderParams::default(),
         }
     }
 }

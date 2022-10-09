@@ -7,7 +7,7 @@ pub struct CachedRandom {
 impl CachedRandom {
     pub(crate) fn new() -> Self {
         let mut rand = rand::thread_rng();
-        let slice = vec![0; 10000].iter().map(|_| { rand.gen::<f64>() }).collect();
+        let slice = vec![0; 10000].iter().map(|_| rand.gen::<f64>()).collect();
 
         Self {
             curr_index: 0,

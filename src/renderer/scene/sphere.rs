@@ -1,6 +1,6 @@
 use crate::math::Point3;
-use crate::{Ray, Vec3};
 use crate::renderer::hittable::{Hit, Hittable};
+use crate::{Ray, Vec3};
 use type_uuid::TypeUuid;
 use uuid::Uuid;
 
@@ -9,7 +9,7 @@ use uuid::Uuid;
 pub struct Sphere {
     pub(crate) center: Point3,
     pub(crate) radius: f64,
-    pub max_radius: f64
+    pub max_radius: f64,
 }
 
 impl Sphere {
@@ -17,7 +17,7 @@ impl Sphere {
         Sphere {
             center,
             radius,
-            max_radius: 5.0 * radius
+            max_radius: 5.0 * radius,
         }
     }
 }
@@ -29,10 +29,9 @@ impl Hittable for Sphere {
         let half_b = Vec3::dot(&oc, ray.direction());
         let c = oc.length_squared() - self.radius * self.radius;
 
-
         let discriminant = half_b * half_b - a * c;
         return if discriminant < 0.0 {
-             None
+            None
         } else {
             let sqrtd = discriminant.sqrt();
 
@@ -46,12 +45,12 @@ impl Hittable for Sphere {
             }
 
             let hit_point = ray.at(root);
-            let hit_record = Hit{
+            let hit_record = Hit {
                 point: hit_point,
                 normal: (hit_point - self.center) / self.radius,
-                t: root
+                t: root,
             };
-            return Some(hit_record)
+            return Some(hit_record);
         };
     }
 

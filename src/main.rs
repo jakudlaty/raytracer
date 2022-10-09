@@ -3,15 +3,14 @@
 
 extern crate core;
 
-
-use eframe::{egui, HardwareAcceleration};
-use egui::Vec2;
 use crate::app::MyApp;
 use crate::math::{Color3, Ray, Vec3};
+use eframe::{egui, HardwareAcceleration};
+use egui::Vec2;
 
-mod renderer;
-mod math;
 mod app;
+mod math;
+mod renderer;
 
 fn main() {
     let mut options = eframe::NativeOptions::default();
@@ -25,4 +24,3 @@ fn main() {
         Box::new(|_cc| Box::new(MyApp::default())),
     );
 }
-

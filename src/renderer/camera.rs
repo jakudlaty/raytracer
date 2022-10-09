@@ -5,7 +5,7 @@ pub struct Camera {
     origin: Point3,
     lower_left_corner: Vec3,
     pub(crate) viewport_width: f64,
-    viewport_height: f64
+    viewport_height: f64,
 }
 
 impl Camera {
@@ -19,15 +19,18 @@ impl Camera {
         let origin = Point3::new(0.0, 0.0, 0.0);
 
         // let lower_left_corner = origin - (horizontal / 2.0) - (vertical / 2.0) - Vec3::new(0.0, 0.0, focal_length);
-        let lower_left_corner = Vec3::new(origin.x() - (viewport_width / 2.0), origin.y() - (viewport_height / 2.0), origin.z() - focal_length);
+        let lower_left_corner = Vec3::new(
+            origin.x() - (viewport_width / 2.0),
+            origin.y() - (viewport_height / 2.0),
+            origin.z() - focal_length,
+        );
 
         Self {
             origin,
             lower_left_corner,
             viewport_width,
-            viewport_height
+            viewport_height,
         }
-
     }
 
     pub fn cast_ray(&self, u: f64, v: f64) -> Ray {

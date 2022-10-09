@@ -1,13 +1,12 @@
+use crate::renderer::scene::sphere::Sphere;
+use crate::renderer::scene::Scene;
+use crate::renderer::{RenderParams, Renderer};
+use crate::{MyApp, Ray, Vec3};
+use egui::{Color32, ColorImage, Id, Response, TextureFilter, TextureHandle, Ui};
 use std::mem;
 use std::time::Instant;
-use egui::{Color32, ColorImage, Id, Response, TextureFilter, TextureHandle, Ui};
-use crate::{ MyApp, Ray, Vec3};
-use uuid::Uuid;
 use type_uuid::TypeUuid;
-use crate::renderer::{Renderer, RenderParams};
-use crate::renderer::scene::Scene;
-use crate::renderer::scene::sphere::Sphere;
-
+use uuid::Uuid;
 
 pub struct RenderBox {
     tex_handle: Option<TextureHandle>,
@@ -15,7 +14,6 @@ pub struct RenderBox {
     renderer: Renderer,
     scene: Scene,
 }
-
 
 impl RenderBox {
     pub fn new() -> RenderBox {
@@ -28,40 +26,32 @@ impl RenderBox {
         }
     }
 
-
     pub fn render(&mut self, ui: &mut Ui, params: &RenderParams) -> Response {
         let texture: &mut TextureHandle = self.tex_handle.get_or_insert_with(|| {
             // Load the texture only once.
-            ui.ctx().load_texture(
-                "my-image",
-                self.render_image.clone(),
-                TextureFilter::Linear,
-            )
+            ui.ctx()
+                .load_texture("my-image", self.render_image.clone(), TextureFilter::Linear)
         });
 
-        self.renderer.render(&mut self.render_image, params, &self.scene);
+        self.renderer
+            .render(&mut self.render_image, params, &self.scene);
         texture.set(self.render_image.clone(), TextureFilter::Linear);
         ui.image(texture, ui.available_size())
     }
 }
-
 
 impl eframe::App for MyApp {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         egui::SidePanel::right("right_panel").show(ctx, |ui| {
             ui.heading("Render parameters ");
             ui.add(
-                egui::Slider::new(&mut self.params.focal_length, 0.0..=1.0)
-                    .text("Focal length")
+                egui::Slider::new(&mut self.params.focal_length, 0.0..=1.0).text("Focal length"),
             );
-            ui.add(
-                egui::Slider::new(&mut self.params.samples, 0..=100)
-                    .text("Number of samples")
-            );
+            ui.add(egui::Slider::new(&mut self.params.samples, 0..=100).text("Number of samples"));
 
             ui.add(
                 egui::Slider::new(&mut self.params.min_ray_distance, 0.0001..=0.1)
-                    .text("Min ray distance")
+                    .text("Min ray distance"),
             );
 
             ui.heading("Scene contents ");
@@ -72,13 +62,12 @@ impl eframe::App for MyApp {
                     if object.uid() == Uuid::from_bytes(Sphere::UUID) {
                         //this is sphere
                         ui.collapsing("Sphere", |ui2| {
-
                             //TODO: Make it safe
                             unsafe {
                                 let sphere: &mut Box<Sphere> = mem::transmute(object);
                                 ui2.add(
                                     egui::Slider::new(&mut sphere.radius, 0.0..=100.0)
-                                        .text("Sphere radius")
+                                        .text("Sphere radius"),
                                 );
                             }
                         });

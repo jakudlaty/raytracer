@@ -1,6 +1,5 @@
 use std::ops::{Add, Div, Mul, Sub};
 
-
 #[derive(Default, Copy, Clone, Debug)]
 pub struct Vec3 {
     pub(crate) data: [f64; 3],
@@ -8,21 +7,17 @@ pub struct Vec3 {
 
 impl Vec3 {
     pub fn new(x: f64, y: f64, z: f64) -> Self {
-        Self {
-            data: [x, y, z]
-        }
+        Self { data: [x, y, z] }
     }
 
     //    #[inline(always)]
     pub fn from(data: [f64; 3]) -> Self {
-        Self {
-            data
-        }
+        Self { data }
     }
 
     pub fn splat(value: f64) -> Self {
         Self {
-            data: [value, value, value]
+            data: [value, value, value],
         }
     }
 
@@ -31,12 +26,10 @@ impl Vec3 {
         self.data[0]
     }
 
-
     //    #[inline(always)]
     pub fn y(&self) -> f64 {
         self.data[1]
     }
-
 
     //    #[inline(always)]
     pub fn z(&self) -> f64 {
@@ -48,13 +41,11 @@ impl Vec3 {
         return self.length_squared().sqrt();
     }
 
-
     //    #[inline(always)]
     pub fn length_squared(&self) -> f64 {
         let e = &self.data;
         return (e[0] * e[0]) + (e[1] * e[1]) + (e[2] * e[2]);
     }
-
 
     //    #[inline(always)]
     pub fn normalized(&self) -> Self {
@@ -63,11 +54,8 @@ impl Vec3 {
 
     //    #[inline(always)]
     pub fn dot(u: &Vec3, v: &Vec3) -> f64 {
-        return (u.data[0] * v.data[0])
-            + (u.data[1] * v.data[1])
-            + (u.data[2] * v.data[2]);
+        return (u.data[0] * v.data[0]) + (u.data[1] * v.data[1]) + (u.data[2] * v.data[2]);
     }
-
 
     //    #[inline(always)]
     pub fn cross(u: &Vec3, v: &Vec3) -> Self {
@@ -84,7 +72,7 @@ impl Vec3 {
             self.x() * alpha + dest.x() * beta,
             self.y() * alpha + dest.y() * beta,
             self.z() * alpha + dest.z() * beta,
-        )
+        );
     }
 }
 
@@ -95,11 +83,7 @@ impl Sub for &Vec3 {
 
     //    #[inline(always)]
     fn sub(self, rhs: Self) -> Self::Output {
-        Vec3::new(
-            self.x() - rhs.x(),
-            self.y() - rhs.y(),
-            self.z() - rhs.z(),
-        )
+        Vec3::new(self.x() - rhs.x(), self.y() - rhs.y(), self.z() - rhs.z())
     }
 }
 
@@ -108,11 +92,7 @@ impl Add for &Vec3 {
 
     //    #[inline(always)]
     fn add(self, rhs: Self) -> Self::Output {
-        Vec3::new(
-            self.x() + rhs.x(),
-            self.y() + rhs.y(),
-            self.z() + rhs.z(),
-        )
+        Vec3::new(self.x() + rhs.x(), self.y() + rhs.y(), self.z() + rhs.z())
     }
 }
 
@@ -121,11 +101,7 @@ impl Mul for &Vec3 {
 
     //    #[inline(always)]
     fn mul(self, rhs: Self) -> Self::Output {
-        Vec3::new(
-            self.x() * rhs.x(),
-            self.y() * rhs.y(),
-            self.z() * rhs.z(),
-        )
+        Vec3::new(self.x() * rhs.x(), self.y() * rhs.y(), self.z() * rhs.z())
     }
 }
 
@@ -134,14 +110,9 @@ impl Div for &Vec3 {
 
     //    #[inline(always)]
     fn div(self, rhs: Self) -> Self::Output {
-        Vec3::new(
-            self.x() / rhs.x(),
-            self.y() / rhs.y(),
-            self.z() / rhs.z(),
-        )
+        Vec3::new(self.x() / rhs.x(), self.y() / rhs.y(), self.z() / rhs.z())
     }
 }
-
 
 //Math on values
 impl Sub for Vec3 {
@@ -171,7 +142,6 @@ impl Mul for Vec3 {
     }
 }
 
-
 impl Div for Vec3 {
     type Output = Vec3;
 
@@ -181,32 +151,22 @@ impl Div for Vec3 {
     }
 }
 
-
 //scalar math
 impl Mul<f64> for &Vec3 {
     type Output = Vec3;
 
     //    #[inline(always)]
     fn mul(self, rhs: f64) -> Self::Output {
-        Vec3::new(
-            self.x() * rhs,
-            self.y() * rhs,
-            self.z() * rhs,
-        )
+        Vec3::new(self.x() * rhs, self.y() * rhs, self.z() * rhs)
     }
 }
-
 
 impl Div<f64> for &Vec3 {
     type Output = Vec3;
 
     //    #[inline(always)]
     fn div(self, rhs: f64) -> Self::Output {
-        Vec3::new(
-            self.x() / rhs,
-            self.y() / rhs,
-            self.z() / rhs,
-        )
+        Vec3::new(self.x() / rhs, self.y() / rhs, self.z() / rhs)
     }
 }
 
@@ -219,7 +179,6 @@ impl Mul<f64> for Vec3 {
     }
 }
 
-
 impl Div<f64> for Vec3 {
     type Output = Vec3;
 
@@ -229,10 +188,11 @@ impl Div<f64> for Vec3 {
     }
 }
 
-
 pub type Point3 = Vec3;
 pub type Color3 = Vec3;
 
 impl Color3 {
-    pub const WHITE: Color3 = Color3 { data: [1.0, 1.0, 1.0] };
+    pub const WHITE: Color3 = Color3 {
+        data: [1.0, 1.0, 1.0],
+    };
 }

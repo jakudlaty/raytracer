@@ -1,12 +1,11 @@
-use uuid::Uuid;
 use crate::math::Point3;
-use crate::Ray;
 use crate::renderer::hittable::{Hit, Hittable};
-use type_uuid::TypeUuid;
 use crate::renderer::scene::sphere::Sphere;
+use crate::Ray;
+use type_uuid::TypeUuid;
+use uuid::Uuid;
 
 pub(crate) mod sphere;
-
 
 #[derive(TypeUuid)]
 #[uuid = "d4adfc76-f5f4-40b0-8e28-8a51a12f5e46"]
@@ -43,7 +42,7 @@ impl Default for Scene {
             contents: vec![
                 Box::new(Sphere::new(Point3::new(0.0, 0.0, -1.0), 0.5)),
                 Box::new(Sphere::new(Point3::new(0.0, -100.5, -1.0), 100.0)),
-            ]
+            ],
         }
     }
 }
