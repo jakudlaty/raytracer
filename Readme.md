@@ -26,3 +26,7 @@ git clone https://github.com/jakudlaty/raytracer.git
 cd raytracer
 cargo run --release
 ```
+
+### Literature (free interesting books)
+- https://raytracing.github.io/
+- https://www.pbr-book.org/
