@@ -4,9 +4,10 @@ use crate::renderer::{RenderParams, Renderer};
 use crate::{MyApp};
 use egui::{Color32, ColorImage, Response, TextureFilter, TextureHandle, Ui};
 use std::mem;
-use std::time::Instant;
 use type_uuid::TypeUuid;
 use uuid::Uuid;
+use crate::renderer::hittable::Hittable;
+
 
 pub struct RenderBox {
     tex_handle: Option<TextureHandle>,
@@ -17,11 +18,11 @@ pub struct RenderBox {
 
 impl RenderBox {
     pub fn new() -> RenderBox {
-        let image_data = ColorImage::new([800, 600], Color32::default());
+        let image_data = ColorImage::new([400, 300], Color32::default());
         Self {
             tex_handle: None,
             render_image: image_data,
-            renderer: Renderer::new(),
+            renderer: Renderer::create(),
             scene: Scene::default(),
         }
     }
@@ -34,7 +35,10 @@ impl RenderBox {
         });
 
         self.renderer
-            .render(&mut self.render_image, params, &self.scene);
+            .render(&mut self.render_image, params.clone(), self.scene.clone_box());
+
+
+
         texture.set(self.render_image.clone(), TextureFilter::Linear);
         ui.image(texture, ui.available_size())
     }
@@ -66,8 +70,8 @@ impl eframe::App for MyApp {
                             unsafe {
                                 let sphere: &mut Box<Sphere> = mem::transmute(object);
                                 ui2.add(
-                                    egui::Slider::new(&mut sphere.radius, 0.0..=100.0)
-                                        .text("Sphere radius"),
+                                    egui::Slider::new(&mut sphere.radius, 0.0..=sphere.max_radius)
+                                        .text("Sphere radius")
                                 );
                             }
                         });
@@ -76,10 +80,6 @@ impl eframe::App for MyApp {
             }
         });
         egui::CentralPanel::default().show(ctx, |ui| {
-            let delta = self.last_frame_time.elapsed().as_micros() as f64;
-            self.last_frame_time = Instant::now();
-
-            ui.heading(format!("Render ms: {:.2}", delta / 1000.0));
             self.render_box.render(ui, &self.params);
         });
         ctx.request_repaint();

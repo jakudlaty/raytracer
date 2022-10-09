@@ -1,5 +1,9 @@
+use std::io::Error;
+use std::sync::mpsc::{channel, Receiver, RecvError, Sender};
+use std::task::ready;
+use std::thread;
 use crate::{Color3, Ray, Vec3};
-use egui::ColorImage;
+use egui::{Color32, ColorImage};
 use rand::rngs::ThreadRng;
 use rand::{thread_rng, Rng};
 
@@ -11,6 +15,7 @@ pub mod camera;
 pub mod hittable;
 pub mod scene;
 
+#[derive(Copy, Clone)]
 pub struct RenderParams {
     pub(crate) focal_length: f64,
     pub(crate) samples: i16,
@@ -21,24 +26,57 @@ impl Default for RenderParams {
     fn default() -> Self {
         Self {
             focal_length: 1.0,
-            samples: 10,
+            samples: 2,
             min_ray_distance: 0.001,
         }
     }
 }
 
-pub struct Renderer {
-    random: ThreadRng,
+enum RenderThreadCommand {
+    //TODO: if the scene grows it should be shared between UI and renderer in RWMutex to prevent copying scene on each frame
+    UpdateScene(Box<dyn Hittable>),
+    UpdateRenderParams(RenderParams),
+    RequestFrame,
 }
 
-impl Renderer {
-    pub(crate) fn new() -> Self {
-        Self {
-            random: thread_rng(),
+enum RenderThreadResponse {
+    FrameRendered(ColorImage)
+}
+
+pub struct RenderThread {
+    sender: Sender<RenderThreadResponse>,
+    receiver: Receiver<RenderThreadCommand>,
+    scene: Option<Box<dyn Hittable>>,
+    params: RenderParams,
+}
+
+impl RenderThread {
+    pub(crate) fn run(&mut self) -> Result<(), RecvError> {
+        loop {
+            let command = self.receiver.recv()?;
+            match command {
+                RenderThreadCommand::UpdateScene(scene) => {
+                    self.scene = Some(scene)
+                }
+                RenderThreadCommand::UpdateRenderParams(params) => {
+                    self.params = params
+                }
+                RenderThreadCommand::RequestFrame => {
+                    if let Some(scene) = &self.scene {
+                        let mut image = ColorImage::new([800, 600], Color32::BLACK);
+                        let render_params = &self.params;
+                        self.render(&mut image, render_params, scene.clone_box());
+                        self.sender.send(RenderThreadResponse::FrameRendered(image))
+                            .expect("Unable to send response")
+                    }
+                }
+            }
         }
     }
 
-    pub fn render(&mut self, image: &mut ColorImage, params: &RenderParams, scene: &Scene) {
+
+    pub fn render(&self, image: &mut ColorImage, params: &RenderParams, scene: Box<dyn Hittable>) {
+        let mut rng = thread_rng();
         let image_width = image.size[0] as f64;
         let camera = Camera::new(image.size, params.focal_length);
         let scale = camera.viewport_width / image_width;
@@ -48,11 +86,11 @@ impl Renderer {
                 let mut cumulated_color = Color3::splat(0.0);
 
                 for _sample in 1..params.samples {
-                    let u = (x as f64 + self.random.gen::<f64>()) * scale;
-                    let v = (y as f64 + self.random.gen::<f64>()) * scale;
+                    let u = (x as f64 + rng.gen::<f64>()) * scale;
+                    let v = (y as f64 + rng.gen::<f64>()) * scale;
 
                     let ray = camera.cast_ray(u, v);
-                    let color = self.ray_color(&ray, scene, params, 0);
+                    let color = Self::ray_color(&ray, scene.clone(), params, 0);
                     cumulated_color = cumulated_color + color;
                 }
 
@@ -61,7 +99,7 @@ impl Renderer {
         }
     }
 
-    fn ray_color(&mut self, ray: &Ray, scene: &Scene, params: &RenderParams, depth: i32) -> Color3 {
+    fn ray_color(ray: &Ray, scene: Box<dyn Hittable>, params: &RenderParams, depth: i32) -> Color3 {
         if depth > 50 {
             return Color3::splat(0.0);
         }
@@ -69,10 +107,10 @@ impl Renderer {
 
         // let hit_distance = Self::hit_sphere(&center, radius, ray);
         if let Some(the_hit) = hit {
-            let random_bounce = the_hit.point + the_hit.normal + self.random_in_unit_sphere();
+            let random_bounce = the_hit.point + the_hit.normal + Self::random_in_unit_sphere();
             // return (the_hit.normal + Color3::splat(1.0)) * 0.5;
             let new_ray = Ray::new(the_hit.point, random_bounce);
-            return self.ray_color(&new_ray, &scene, params, depth + 1) * 0.5;
+            return Self::ray_color(&new_ray, scene, params, depth + 1) * 0.5;
         }
 
         let unit_direction = ray.direction() / ray.direction().length();
@@ -95,12 +133,70 @@ impl Renderer {
         dest[2] = fast_round(b * ALMOST_256);
     }
 
-    fn random_in_unit_sphere(&mut self) -> Vec3 {
+    fn random_in_unit_sphere() -> Vec3 {
+        let mut rng = thread_rng();
         Vec3::new(
-            self.random.gen::<f64>(),
-            self.random.gen::<f64>(),
-            self.random.gen::<f64>(),
+            rng.gen::<f64>(),
+            rng.gen::<f64>(),
+            rng.gen::<f64>(),
         )
+    }
+}
+
+pub struct Renderer {
+    sender: Sender<RenderThreadCommand>,
+    receiver: Receiver<RenderThreadResponse>,
+    waiting_for_next_frame: bool
+}
+
+impl Renderer {
+    pub(crate) fn create() -> Self {
+        let (command_sender, command_revceiver) = channel();
+        let (response_sender, response_receiver) = channel();
+
+
+        let handle = thread::spawn(|| {
+            let mut thread = RenderThread {
+                sender: response_sender,
+                receiver: command_revceiver,
+                scene: None,
+                params: RenderParams::default(),
+            };
+
+            thread.run()
+        });
+
+        Self {
+            sender: command_sender,
+            receiver: response_receiver,
+            waiting_for_next_frame: false
+        }
+    }
+
+    fn send_command(&self, command: RenderThreadCommand) {
+        self.sender.send(command)
+            .expect("Unable to comunicate with renderer");
+    }
+
+    pub fn render(&mut self, image: &mut ColorImage, params: RenderParams, scene: Box<dyn Hittable>){
+        if ! self.waiting_for_next_frame {
+            self.send_command(RenderThreadCommand::UpdateScene(scene));
+            self.send_command(RenderThreadCommand::UpdateRenderParams(params));
+            self.send_command(RenderThreadCommand::RequestFrame);
+            self.waiting_for_next_frame = true
+        } else {
+            if let Ok(f) = self.receiver.try_recv() {
+                match f {
+                    RenderThreadResponse::FrameRendered(im) => {
+                        *image = im
+                    }
+                }
+                self.waiting_for_next_frame = false
+            }
+
+        }
+
+
     }
 }
 

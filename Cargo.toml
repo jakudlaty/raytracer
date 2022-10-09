@@ -2,7 +2,7 @@
 name = "raytracer-rs"
 version = "0.1.1"
 edition = "2021"
-authors = [ "Maciej Stępyra <jakudlaty@gmail.com>" ]
+authors = ["Maciej Stępyra <jakudlaty@gmail.com>"]
 description = "This is Rust implementation of raytracer described in \"Ray Tracing in One Weekend\""
 homepage = "https://github.com/jakudlaty/raytracer"
 repository = "https://github.com/jakudlaty/raytracer.git"
@@ -12,13 +12,15 @@ readme = "Readme.md"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-egui = "0.19.0"
-eframe = { version = "0.19.0", default_features = false, features = ["wgpu"] }
+egui = { version = "0.19.0" }
+eframe = { version = "0.19.0" }
 type-uuid = "0.1.2"
 uuid = "1.2.0"
 rand = "0.8.5"
 
-#eframe = { version = "0.19.0" }
+
+[features]
+wgpu = ["eframe/wgpu"]
 
 [profile.release]
 opt-level = 3

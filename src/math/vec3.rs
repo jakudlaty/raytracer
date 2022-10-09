@@ -1,4 +1,4 @@
-use std::ops::{Add, Div, Mul, Sub};
+use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Default, Copy, Clone, Debug)]
 pub struct Vec3 {
@@ -187,6 +187,19 @@ impl Div<f64> for Vec3 {
         &self / rhs
     }
 }
+
+impl Neg for Vec3 {
+    type Output = Vec3;
+
+    fn neg(self) -> Self::Output {
+        Vec3::new(
+            -self.x(),
+            -self.y(),
+            -self.z(),
+        )
+    }
+}
+
 
 pub type Point3 = Vec3;
 pub type Color3 = Vec3;

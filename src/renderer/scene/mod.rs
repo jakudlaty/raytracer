@@ -13,6 +13,7 @@ pub struct Scene {
     pub(crate) contents: Vec<Box<dyn Hittable>>,
 }
 
+
 impl Hittable for Scene {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<Hit> {
         let mut closest_so_far = t_max;
@@ -34,7 +35,20 @@ impl Hittable for Scene {
     fn name(&self) -> String {
         "scene".to_string()
     }
+
+    fn clone_box(&self) -> Box<dyn Hittable> {
+        let members: Vec<Box<dyn Hittable>> = self.contents.iter().map(|a| {
+            a.clone_box()
+        }).collect();
+
+        return Box::new(
+            Self {
+                contents: members
+            }
+        )
+    }
 }
+
 
 impl Default for Scene {
     fn default() -> Self {
