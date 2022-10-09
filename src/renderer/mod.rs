@@ -88,10 +88,8 @@ impl Renderer {
                     RenderThreadResponse::FrameRendered(im) => {
                         *image = im;
                         self.waiting_for_next_frame = false
-                    },
-                    RenderThreadResponse::ProgressUpdate(fraction) => {
-                        self.progress = fraction
                     }
+                    RenderThreadResponse::ProgressUpdate(fraction) => self.progress = fraction,
                 }
             }
         }
