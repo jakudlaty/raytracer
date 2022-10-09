@@ -1,6 +1,5 @@
 use crate::math::Point3;
 use crate::{Ray, Vec3};
-use uuid::Uuid;
 
 pub struct Hit {
     pub(crate) point: Point3,
@@ -11,7 +10,5 @@ pub struct Hit {
 
 pub trait Hittable: Send + Sync + Clone {
     fn hit(&self, ray: &Ray, t_min: f64, t_max: f64) -> Option<Hit>;
-    fn uid(&self) -> Uuid;
     fn name(&self) -> String;
 }
-

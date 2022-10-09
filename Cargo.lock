@@ -1475,8 +1475,6 @@ dependencies = [
  "eframe",
  "egui",
  "rand",
- "type-uuid",
- "uuid 1.2.0",
 ]
 
 [[package]]
@@ -1781,26 +1779,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "type-uuid"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "15043bca41f43205c9b0055d365a405d81b8e4a8ff99c36b263cf79ad1f4c051"
-dependencies = [
- "type-uuid-derive",
-]
-
-[[package]]
-name = "type-uuid-derive"
-version = "0.1.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8e090ee857961c746ecf7fb596022493ffaad54d189061df49f7a0cf17796dc1"
-dependencies = [
- "quote",
- "syn",
- "uuid 0.8.2",
-]
-
-[[package]]
 name = "unicode-bidi"
 version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1843,18 +1821,6 @@ dependencies = [
  "idna",
  "percent-encoding",
 ]
-
-[[package]]
-name = "uuid"
-version = "0.8.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc5cf98d8186244414c848017f0e2676b3fcb46807f6668a97dfe67359a3c4b7"
-
-[[package]]
-name = "uuid"
-version = "1.2.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "683f0a095f6dcf74520a5f17a12452ae6f970abbd2443299a1e226fd38195f2b"
 
 [[package]]
 name = "vec_map"

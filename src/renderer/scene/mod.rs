@@ -2,20 +2,14 @@ use crate::math::Point3;
 use crate::renderer::hittable::{Hit, Hittable};
 use crate::renderer::scene::sphere::Sphere;
 use crate::Ray;
-use type_uuid::TypeUuid;
-use uuid::Uuid;
 
 pub(crate) mod sphere;
 
 #[derive(Clone)]
 pub enum SceneObject {
-    Sphere(Sphere)
+    Sphere(Sphere),
 }
 
-
-
-#[derive(TypeUuid)]
-#[uuid = "d4adfc76-f5f4-40b0-8e28-8a51a12f5e46"]
 pub struct Scene {
     pub(crate) contents: Vec<SceneObject>,
 }
@@ -23,7 +17,7 @@ pub struct Scene {
 impl Clone for Scene {
     fn clone(&self) -> Self {
         Self {
-            contents: self.contents.iter().cloned().collect()
+            contents: self.contents.iter().cloned().collect(),
         }
     }
 }
@@ -42,20 +36,14 @@ impl Hittable for Scene {
                     }
                 }
             }
-
         }
         return closest_hit;
-    }
-
-    fn uid(&self) -> Uuid {
-        return Uuid::from_bytes(Scene::UUID);
     }
 
     fn name(&self) -> String {
         "scene".to_string()
     }
 }
-
 
 impl Default for Scene {
     fn default() -> Self {

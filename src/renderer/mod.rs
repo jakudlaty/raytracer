@@ -1,11 +1,11 @@
-use std::io::Error;
-use std::sync::mpsc::{channel, Receiver, RecvError, Sender};
-use std::task::ready;
-use std::thread;
 use crate::{Color3, Ray, Vec3};
 use egui::{Color32, ColorImage};
 use rand::rngs::ThreadRng;
 use rand::{thread_rng, Rng};
+use std::io::Error;
+use std::sync::mpsc::{channel, Receiver, RecvError, Sender};
+use std::task::ready;
+use std::thread;
 
 use crate::renderer::camera::Camera;
 use crate::renderer::hittable::Hittable;
@@ -40,7 +40,7 @@ enum RenderThreadCommand {
 }
 
 enum RenderThreadResponse {
-    FrameRendered(ColorImage)
+    FrameRendered(ColorImage),
 }
 
 pub struct RenderThread {
@@ -55,25 +55,21 @@ impl RenderThread {
         loop {
             let command = self.receiver.recv()?;
             match command {
-                RenderThreadCommand::UpdateScene(scene) => {
-                    self.scene = Some(scene)
-                }
-                RenderThreadCommand::UpdateRenderParams(params) => {
-                    self.params = params
-                }
+                RenderThreadCommand::UpdateScene(scene) => self.scene = Some(scene),
+                RenderThreadCommand::UpdateRenderParams(params) => self.params = params,
                 RenderThreadCommand::RequestFrame => {
                     if let Some(scene) = &self.scene {
                         let mut image = ColorImage::new([800, 600], Color32::BLACK);
                         let render_params = &self.params;
                         self.render(&mut image, render_params, scene);
-                        self.sender.send(RenderThreadResponse::FrameRendered(image))
+                        self.sender
+                            .send(RenderThreadResponse::FrameRendered(image))
                             .expect("Unable to send response")
                     }
                 }
             }
         }
     }
-
 
     pub fn render(&self, image: &mut ColorImage, params: &RenderParams, scene: &Scene) {
         let mut rng = thread_rng();
@@ -135,25 +131,20 @@ impl RenderThread {
 
     fn random_in_unit_sphere() -> Vec3 {
         let mut rng = thread_rng();
-        Vec3::new(
-            rng.gen::<f64>(),
-            rng.gen::<f64>(),
-            rng.gen::<f64>(),
-        )
+        Vec3::new(rng.gen::<f64>(), rng.gen::<f64>(), rng.gen::<f64>())
     }
 }
 
 pub struct Renderer {
     sender: Sender<RenderThreadCommand>,
     receiver: Receiver<RenderThreadResponse>,
-    waiting_for_next_frame: bool
+    waiting_for_next_frame: bool,
 }
 
 impl Renderer {
     pub(crate) fn create() -> Self {
         let (command_sender, command_revceiver) = channel();
         let (response_sender, response_receiver) = channel();
-
 
         let handle = thread::spawn(|| {
             let mut thread = RenderThread {
@@ -169,17 +160,18 @@ impl Renderer {
         Self {
             sender: command_sender,
             receiver: response_receiver,
-            waiting_for_next_frame: false
+            waiting_for_next_frame: false,
         }
     }
 
     fn send_command(&self, command: RenderThreadCommand) {
-        self.sender.send(command)
+        self.sender
+            .send(command)
             .expect("Unable to comunicate with renderer");
     }
 
-    pub fn render(&mut self, image: &mut ColorImage, params: RenderParams, scene: &Scene){
-        if ! self.waiting_for_next_frame {
+    pub fn render(&mut self, image: &mut ColorImage, params: RenderParams, scene: &Scene) {
+        if !self.waiting_for_next_frame {
             self.send_command(RenderThreadCommand::UpdateScene(scene.clone()));
             self.send_command(RenderThreadCommand::UpdateRenderParams(params));
             self.send_command(RenderThreadCommand::RequestFrame);
@@ -187,16 +179,11 @@ impl Renderer {
         } else {
             if let Ok(f) = self.receiver.try_recv() {
                 match f {
-                    RenderThreadResponse::FrameRendered(im) => {
-                        *image = im
-                    }
+                    RenderThreadResponse::FrameRendered(im) => *image = im,
                 }
                 self.waiting_for_next_frame = false
             }
-
         }
-
-
     }
 }
 

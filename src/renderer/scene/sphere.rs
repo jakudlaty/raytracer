@@ -1,11 +1,8 @@
 use crate::math::Point3;
 use crate::renderer::hittable::{Hit, Hittable};
 use crate::{Ray, Vec3};
-use type_uuid::TypeUuid;
-use uuid::Uuid;
 
-#[derive(TypeUuid, Copy, Clone)]
-#[uuid = "d4adfc76-f5f4-40b0-8e28-8a51a12f5e46"]
+#[derive(Clone)]
 pub struct Sphere {
     pub(crate) center: Point3,
     pub(crate) radius: f64,
@@ -17,7 +14,7 @@ impl Sphere {
         Sphere {
             center,
             radius,
-            max_radius: 5.0 * radius,
+            max_radius: 2.0 * radius,
         }
     }
 }
@@ -50,9 +47,8 @@ impl Hittable for Sphere {
             let front_face = Vec3::dot(ray.direction(), &outward_normal) < 0.0;
             let normal = match front_face {
                 true => outward_normal,
-                false => -outward_normal
+                false => -outward_normal,
             };
-
 
             let hit_record = Hit {
                 point: hit_point,
@@ -64,11 +60,7 @@ impl Hittable for Sphere {
         };
     }
 
-    fn uid(&self) -> Uuid {
-        Uuid::from_bytes(Sphere::UUID)
-    }
-
     fn name(&self) -> String {
-        format!("Spehere {}", 1)
+        format!("Spehere at {}", self.center)
     }
 }

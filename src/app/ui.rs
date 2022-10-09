@@ -1,13 +1,8 @@
-use crate::renderer::scene::sphere::Sphere;
 use crate::renderer::scene::{Scene, SceneObject};
 use crate::renderer::{RenderParams, Renderer};
-use crate::{MyApp};
+use crate::MyApp;
 use egui::{Color32, ColorImage, Response, TextureFilter, TextureHandle, Ui};
-use std::mem;
-use type_uuid::TypeUuid;
-use uuid::Uuid;
 use crate::renderer::hittable::Hittable;
-
 
 pub struct RenderBox {
     tex_handle: Option<TextureHandle>,
@@ -37,8 +32,6 @@ impl RenderBox {
         self.renderer
             .render(&mut self.render_image, params.clone(), &self.scene);
 
-
-
         texture.set(self.render_image.clone(), TextureFilter::Linear);
         ui.image(texture, ui.available_size())
     }
@@ -62,17 +55,14 @@ impl eframe::App for MyApp {
             let mut id = 1;
             for object in &mut self.render_box.scene.contents {
                 id += 1;
-                ui.push_id(id, |ui| {
-                    match object {
-                        SceneObject::Sphere(sphere) => {
-                            ui.collapsing("Sphere", |ui2| {
-                                ui2.add(
-                                    egui::Slider::new(&mut sphere.radius, 0.0..=sphere.max_radius)
-                                        .text("Sphere radius")
-                                );
-                            });
-                        }
-
+                ui.push_id(id, |ui| match object {
+                    SceneObject::Sphere(sphere) => {
+                        ui.collapsing(sphere.name(), |ui2| {
+                            ui2.add(
+                                egui::Slider::new(&mut sphere.radius, 0.0..=sphere.max_radius)
+                                    .text("Sphere radius"),
+                            );
+                        });
                     }
                 });
             }

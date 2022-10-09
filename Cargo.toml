@@ -14,8 +14,6 @@ readme = "Readme.md"
 [dependencies]
 egui = { version = "0.19.0" }
 eframe = { version = "0.19.0" }
-type-uuid = "0.1.2"
-uuid = "1.2.0"
 rand = "0.8.5"
 
 

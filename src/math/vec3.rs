@@ -1,3 +1,4 @@
+use std::fmt::{Display, format, Formatter};
 use std::ops::{Add, Div, Mul, Neg, Sub};
 
 #[derive(Default, Copy, Clone, Debug)]
@@ -192,14 +193,9 @@ impl Neg for Vec3 {
     type Output = Vec3;
 
     fn neg(self) -> Self::Output {
-        Vec3::new(
-            -self.x(),
-            -self.y(),
-            -self.z(),
-        )
+        Vec3::new(-self.x(), -self.y(), -self.z())
     }
 }
-
 
 pub type Point3 = Vec3;
 pub type Color3 = Vec3;
@@ -208,4 +204,10 @@ impl Color3 {
     pub const WHITE: Color3 = Color3 {
         data: [1.0, 1.0, 1.0],
     };
+}
+
+impl Display for Vec3 {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "({},{},{})", self.x(), self.y(), self.z())
+    }
 }
