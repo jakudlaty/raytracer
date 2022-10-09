@@ -5,7 +5,7 @@ pub struct Camera {
     origin: Point3,
     lower_left_corner: Vec3,
     pub(crate) viewport_width: f64,
-    viewport_height: f64,
+    pub(crate) viewport_height: f64,
 }
 
 impl Camera {

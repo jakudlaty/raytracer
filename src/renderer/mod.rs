@@ -9,7 +9,6 @@ use crate::renderer::scene::Scene;
 
 pub mod camera;
 pub mod hittable;
-mod random;
 pub mod scene;
 
 pub struct RenderParams {

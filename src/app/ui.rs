@@ -1,8 +1,8 @@
 use crate::renderer::scene::sphere::Sphere;
 use crate::renderer::scene::Scene;
 use crate::renderer::{RenderParams, Renderer};
-use crate::{MyApp, Ray, Vec3};
-use egui::{Color32, ColorImage, Id, Response, TextureFilter, TextureHandle, Ui};
+use crate::{MyApp};
+use egui::{Color32, ColorImage, Response, TextureFilter, TextureHandle, Ui};
 use std::mem;
 use std::time::Instant;
 use type_uuid::TypeUuid;
