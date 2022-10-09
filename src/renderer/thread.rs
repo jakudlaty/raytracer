@@ -18,6 +18,7 @@ pub enum RenderThreadCommand {
 
 pub enum RenderThreadResponse {
     FrameRendered(ColorImage),
+    ProgressUpdate(f64)
 }
 
 pub struct RenderThread {
@@ -51,6 +52,7 @@ impl RenderThread {
     pub fn render(&self, image: &mut ColorImage, params: &RenderParams, scene: &Scene) {
         let mut rng = thread_rng();
         let image_width = image.size[0] as f64;
+        let image_height = image.size[1] as f64;
         let camera = Camera::new(image.size, params.focal_length);
         let scale = camera.viewport_width / image_width;
 
@@ -68,6 +70,10 @@ impl RenderThread {
                 }
 
                 Self::set_pixel(image, x, y, cumulated_color, params.samples);
+            }
+            if y % (image.size[1] / 50) == 0 {
+                self.sender.send(RenderThreadResponse::ProgressUpdate(y as f64 / image_height))
+                    .expect("Unable to comunicate with UI");
             }
         }
     }

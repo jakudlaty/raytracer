@@ -2,7 +2,7 @@ use crate::renderer::hittable::Hittable;
 use crate::renderer::scene::{Scene, SceneObject};
 use crate::renderer::{RenderParams, Renderer};
 use crate::MyApp;
-use egui::{Color32, ColorImage, Response, TextureFilter, TextureHandle, Ui};
+use egui::{Color32, ColorImage, ProgressBar, Response, TextureFilter, TextureHandle, Ui, Widget};
 
 pub struct RenderBox {
     tex_handle: Option<TextureHandle>,
@@ -22,7 +22,7 @@ impl RenderBox {
         }
     }
 
-    pub fn render(&mut self, ui: &mut Ui, params: &RenderParams) -> Response {
+    pub fn render(&mut self, ui: &mut Ui, params: &RenderParams) {
         let texture: &mut TextureHandle = self.tex_handle.get_or_insert_with(|| {
             // Load the texture only once.
             ui.ctx()
@@ -33,7 +33,11 @@ impl RenderBox {
             .render(&mut self.render_image, params.clone(), &self.scene);
 
         texture.set(self.render_image.clone(), TextureFilter::Linear);
-        ui.image(texture, ui.available_size())
+        ui.vertical(|ui| {
+            let pb = ProgressBar::new(self.renderer.progress as f32);
+            pb.ui(ui);
+            ui.image(texture, ui.available_size());
+        });
     }
 }
 
@@ -44,7 +48,7 @@ impl eframe::App for MyApp {
             ui.add(
                 egui::Slider::new(&mut self.params.focal_length, 0.0..=1.0).text("Focal length"),
             );
-            ui.add(egui::Slider::new(&mut self.params.samples, 0..=100).text("Number of samples"));
+            ui.add(egui::Slider::new(&mut self.params.samples, 0..=1000).text("Number of samples"));
 
             ui.add(
                 egui::Slider::new(&mut self.params.min_ray_distance, 0.0001..=0.1)
