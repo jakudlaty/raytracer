@@ -1,7 +1,9 @@
 ## Raytracing in one week
 
 This is Rust implementation of raytracer described in https://raytracing.github.io/books/RayTracingInOneWeekend.html
+
 ![build status](https://github.com/jakudlaty/raytracer/actions/workflows/rust.yml/badge.svg)
+
 Used crates:
 - egui & eframe for UI
 - rand for random number generators
