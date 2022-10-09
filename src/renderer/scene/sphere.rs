@@ -9,6 +9,17 @@ use uuid::Uuid;
 pub struct Sphere {
     pub(crate) center: Point3,
     pub(crate) radius: f64,
+    pub max_radius: f64
+}
+
+impl Sphere {
+    pub fn new(center: Point3, radius: f64) -> Sphere {
+        Sphere {
+            center,
+            radius,
+            max_radius: 5.0 * radius
+        }
+    }
 }
 
 impl Hittable for Sphere {
@@ -35,7 +46,7 @@ impl Hittable for Sphere {
             }
 
             let hit_point = ray.at(root);
-            let mut hit_record = Hit{
+            let hit_record = Hit{
                 point: hit_point,
                 normal: (hit_point - self.center) / self.radius,
                 t: root

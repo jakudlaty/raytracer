@@ -1,13 +1,13 @@
 use std::mem;
 use std::time::Instant;
 use egui::{Color32, ColorImage, Id, Response, TextureFilter, TextureHandle, Ui};
-use crate::{Color3, MyApp, Ray, Vec3};
-use type_uuid::TypeUuid;
+use crate::{ MyApp, Ray, Vec3};
 use uuid::Uuid;
-
+use type_uuid::TypeUuid;
 use crate::renderer::{Renderer, RenderParams};
 use crate::renderer::scene::Scene;
 use crate::renderer::scene::sphere::Sphere;
+
 
 pub struct RenderBox {
     tex_handle: Option<TextureHandle>,
@@ -19,11 +19,11 @@ pub struct RenderBox {
 
 impl RenderBox {
     pub fn new() -> RenderBox {
-        let image_data = ColorImage::new([1600, 1200], Color32::default());
+        let image_data = ColorImage::new([800, 600], Color32::default());
         Self {
             tex_handle: None,
             render_image: image_data,
-            renderer: Renderer {},
+            renderer: Renderer::new(),
             scene: Scene::default(),
         }
     }
@@ -77,11 +77,10 @@ impl eframe::App for MyApp {
             }
         });
         egui::CentralPanel::default().show(ctx, |ui| {
-            let delta = self.last_frame_time.elapsed().as_nanos();
+            let delta = self.last_frame_time.elapsed().as_micros() as f64;
             self.last_frame_time = Instant::now();
 
-            let fps = 1_000_000_000 / delta;
-            ui.heading(format!("Render fps: {}", fps));
+            ui.heading(format!("Render ms: {:.2}", delta / 1000.0));
             self.render_box.render(ui, &self.params);
         });
         ctx.request_repaint();
