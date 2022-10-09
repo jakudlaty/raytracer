@@ -1,0 +1,7 @@
+edition = "2021"
+indent_style = "Block"
+reorder_imports = true
+binop_separator = "Back"
+blank_lines_upper_bound = 2
+brace_style = "SameLineWhere"
+combine_control_expr = false

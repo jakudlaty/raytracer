@@ -1,8 +1,8 @@
+use crate::renderer::hittable::Hittable;
 use crate::renderer::scene::{Scene, SceneObject};
 use crate::renderer::{RenderParams, Renderer};
 use crate::MyApp;
 use egui::{Color32, ColorImage, Response, TextureFilter, TextureHandle, Ui};
-use crate::renderer::hittable::Hittable;
 
 pub struct RenderBox {
     tex_handle: Option<TextureHandle>,
