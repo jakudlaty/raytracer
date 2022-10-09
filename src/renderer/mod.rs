@@ -24,7 +24,7 @@ impl Default for RenderParams {
     fn default() -> Self {
         Self {
             focal_length: 1.0,
-            samples: 2,
+            samples: 200,
             min_ray_distance: 0.001,
         }
     }
@@ -34,6 +34,7 @@ pub struct Renderer {
     sender: Sender<RenderThreadCommand>,
     receiver: Receiver<RenderThreadResponse>,
     waiting_for_next_frame: bool,
+    pub(crate) progress: f64,
 }
 
 impl Renderer {
@@ -56,6 +57,7 @@ impl Renderer {
             sender: command_sender,
             receiver: response_receiver,
             waiting_for_next_frame: false,
+            progress: 0.0,
         }
     }
 
@@ -72,11 +74,16 @@ impl Renderer {
             self.send_command(RenderThreadCommand::RequestFrame);
             self.waiting_for_next_frame = true
         } else {
-            if let Ok(f) = self.receiver.try_recv() {
+            while let Ok(f) = self.receiver.try_recv() {
                 match f {
-                    RenderThreadResponse::FrameRendered(im) => *image = im,
+                    RenderThreadResponse::FrameRendered(im) => {
+                        *image = im;
+                        self.waiting_for_next_frame = false
+                    },
+                    RenderThreadResponse::ProgressUpdate(fraction) => {
+                        self.progress = fraction
+                    }
                 }
-                self.waiting_for_next_frame = false
             }
         }
     }
