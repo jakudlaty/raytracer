@@ -1,6 +1,6 @@
 ## Raytracing in one week
 
-This is Rust implementation of : https://raytracing.github.io/books/RayTracingInOneWeekend.html
+This is Rust implementation of raytracer described in https://raytracing.github.io/books/RayTracingInOneWeekend.html
 
 Used crates:
 - egui & eframe for UI
