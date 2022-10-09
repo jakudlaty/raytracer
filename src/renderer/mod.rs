@@ -34,7 +34,7 @@ impl Default for RenderParams {
 
 enum RenderThreadCommand {
     //TODO: if the scene grows it should be shared between UI and renderer in RWMutex to prevent copying scene on each frame
-    UpdateScene(Box<dyn Hittable>),
+    UpdateScene(Scene),
     UpdateRenderParams(RenderParams),
     RequestFrame,
 }
@@ -46,7 +46,7 @@ enum RenderThreadResponse {
 pub struct RenderThread {
     sender: Sender<RenderThreadResponse>,
     receiver: Receiver<RenderThreadCommand>,
-    scene: Option<Box<dyn Hittable>>,
+    scene: Option<Scene>,
     params: RenderParams,
 }
 
@@ -65,7 +65,7 @@ impl RenderThread {
                     if let Some(scene) = &self.scene {
                         let mut image = ColorImage::new([800, 600], Color32::BLACK);
                         let render_params = &self.params;
-                        self.render(&mut image, render_params, scene.clone_box());
+                        self.render(&mut image, render_params, scene);
                         self.sender.send(RenderThreadResponse::FrameRendered(image))
                             .expect("Unable to send response")
                     }
@@ -75,7 +75,7 @@ impl RenderThread {
     }
 
 
-    pub fn render(&self, image: &mut ColorImage, params: &RenderParams, scene: Box<dyn Hittable>) {
+    pub fn render(&self, image: &mut ColorImage, params: &RenderParams, scene: &Scene) {
         let mut rng = thread_rng();
         let image_width = image.size[0] as f64;
         let camera = Camera::new(image.size, params.focal_length);
@@ -90,7 +90,7 @@ impl RenderThread {
                     let v = (y as f64 + rng.gen::<f64>()) * scale;
 
                     let ray = camera.cast_ray(u, v);
-                    let color = Self::ray_color(&ray, scene.clone(), params, 0);
+                    let color = Self::ray_color(&ray, scene, params, 0);
                     cumulated_color = cumulated_color + color;
                 }
 
@@ -99,7 +99,7 @@ impl RenderThread {
         }
     }
 
-    fn ray_color(ray: &Ray, scene: Box<dyn Hittable>, params: &RenderParams, depth: i32) -> Color3 {
+    fn ray_color(ray: &Ray, scene: &Scene, params: &RenderParams, depth: i32) -> Color3 {
         if depth > 50 {
             return Color3::splat(0.0);
         }
@@ -178,9 +178,9 @@ impl Renderer {
             .expect("Unable to comunicate with renderer");
     }
 
-    pub fn render(&mut self, image: &mut ColorImage, params: RenderParams, scene: Box<dyn Hittable>){
+    pub fn render(&mut self, image: &mut ColorImage, params: RenderParams, scene: &Scene){
         if ! self.waiting_for_next_frame {
-            self.send_command(RenderThreadCommand::UpdateScene(scene));
+            self.send_command(RenderThreadCommand::UpdateScene(scene.clone()));
             self.send_command(RenderThreadCommand::UpdateRenderParams(params));
             self.send_command(RenderThreadCommand::RequestFrame);
             self.waiting_for_next_frame = true

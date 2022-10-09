@@ -1,5 +1,5 @@
 use crate::renderer::scene::sphere::Sphere;
-use crate::renderer::scene::Scene;
+use crate::renderer::scene::{Scene, SceneObject};
 use crate::renderer::{RenderParams, Renderer};
 use crate::{MyApp};
 use egui::{Color32, ColorImage, Response, TextureFilter, TextureHandle, Ui};
@@ -35,7 +35,7 @@ impl RenderBox {
         });
 
         self.renderer
-            .render(&mut self.render_image, params.clone(), self.scene.clone_box());
+            .render(&mut self.render_image, params.clone(), &self.scene);
 
 
 
@@ -63,19 +63,17 @@ impl eframe::App for MyApp {
             for object in &mut self.render_box.scene.contents {
                 id += 1;
                 ui.push_id(id, |ui| {
-                    if object.uid() == Uuid::from_bytes(Sphere::UUID) {
-                        //this is sphere
-                        ui.collapsing("Sphere", |ui2| {
-                            //TODO: Make it safe
-                            unsafe {
-                                let sphere: &mut Box<Sphere> = mem::transmute(object);
+                    match object {
+                        SceneObject::Sphere(sphere) => {
+                            ui.collapsing("Sphere", |ui2| {
                                 ui2.add(
                                     egui::Slider::new(&mut sphere.radius, 0.0..=sphere.max_radius)
                                         .text("Sphere radius")
                                 );
-                            }
-                        });
-                    };
+                            });
+                        }
+
+                    }
                 });
             }
         });

@@ -71,8 +71,4 @@ impl Hittable for Sphere {
     fn name(&self) -> String {
         format!("Spehere {}", 1)
     }
-
-    fn clone_box(&self) -> Box<dyn Hittable> {
-        Box::new(self.clone())
-    }
 }
