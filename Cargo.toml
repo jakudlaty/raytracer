@@ -7,7 +7,7 @@ description = "This is Rust implementation of raytracer described in \"Ray Traci
 homepage = "https://github.com/jakudlaty/raytracer"
 repository = "https://github.com/jakudlaty/raytracer.git"
 license = "MIT"
-readme = "README.md"
+readme = "Readme.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
