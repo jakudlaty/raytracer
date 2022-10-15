@@ -75,11 +75,15 @@ impl RenderThread {
             if y % (image.size[1] / 50) == 0 {
                 self.sender
                     .send(RenderThreadResponse::ProgressUpdate(
-                        y as f64 / image_height,
+                        (y + 1) as f64 / image_height,
                     ))
                     .expect("Unable to comunicate with UI");
             }
         }
+
+        self.sender
+            .send(RenderThreadResponse::ProgressUpdate(1.0))
+            .expect("Unable to comunicate with UI");
     }
 
     fn ray_color(ray: &Ray, scene: &Scene, params: &RenderParams, depth: i32) -> Color3 {

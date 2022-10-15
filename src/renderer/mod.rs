@@ -42,7 +42,8 @@ impl Default for RenderParams {
 pub struct Renderer {
     sender: Sender<RenderThreadCommand>,
     receiver: Receiver<RenderThreadResponse>,
-    waiting_for_next_frame: bool,
+    pub(crate) waiting_for_next_frame: bool,
+    pub(crate) render_requested: bool,
     pub(crate) progress: f64,
 }
 
@@ -66,6 +67,7 @@ impl Renderer {
             sender: command_sender,
             receiver: response_receiver,
             waiting_for_next_frame: false,
+            render_requested: false,
             progress: 0.0,
         }
     }
@@ -76,22 +78,39 @@ impl Renderer {
             .expect("Unable to comunicate with renderer");
     }
 
-    pub fn render(&mut self, image: &mut ColorImage, params: RenderParams, scene: &Scene) {
+    ///
+    /// Try to update output image, return true if image changed
+    ///
+    /// # Arguments
+    ///
+    /// * `image`: Image reference to update
+    ///
+    /// returns: bool
+    ///
+    pub fn update_result(&mut self, image: &mut ColorImage) -> bool {
+        while let Ok(f) = self.receiver.try_recv() {
+            return match f {
+                RenderThreadResponse::FrameRendered(im) => {
+                    *image = im;
+                    self.waiting_for_next_frame = false;
+                    self.render_requested = false;
+                    true
+                }
+                RenderThreadResponse::ProgressUpdate(fraction) => {
+                    self.progress = fraction;
+                    false
+                }
+            }
+        }
+        return false;
+    }
+
+    pub fn request_render(&mut self, params: RenderParams, scene: &Scene) {
         if !self.waiting_for_next_frame {
             self.send_command(RenderThreadCommand::UpdateScene(scene.clone()));
             self.send_command(RenderThreadCommand::UpdateRenderParams(params));
             self.send_command(RenderThreadCommand::RequestFrame);
             self.waiting_for_next_frame = true
-        } else {
-            while let Ok(f) = self.receiver.try_recv() {
-                match f {
-                    RenderThreadResponse::FrameRendered(im) => {
-                        *image = im;
-                        self.waiting_for_next_frame = false
-                    }
-                    RenderThreadResponse::ProgressUpdate(fraction) => self.progress = fraction,
-                }
-            }
-        }
+        } else {}
     }
 }
